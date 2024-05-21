@@ -19,5 +19,9 @@ void afficherPerformance(Performance* performance);
 void ajouterEntrainement();
 void consulterHistorique();
 void consulterStats();
+int validerDate(char* date);
+int validerTemps(float temps);
+int validerEpreuve(char* epreuve);
+int validerGenre(char* genre);
 
 #endif
