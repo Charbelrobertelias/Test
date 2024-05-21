@@ -133,4 +133,8 @@ void consulterHistorique() {
 void consulterStats() {
     char nom[50], epreuve[50];
     printf("Nom de l'athlète: ");
-    scanf("%s",
+    scanf("%s",nom)
+    printf("Epreuve: ");
+    scanf("%s", epreuve);
+    afficherStats(nom, epreuve);
+}
