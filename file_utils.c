@@ -1,4 +1,7 @@
 #include "file_utils.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 void sauvegarderPerformance(char* nom, Performance* performance) {
     char filename[60];
@@ -32,4 +35,3 @@ void lireHistorique(char* nom) {
         printf("Pas d'historique trouvé pour cet athlète\n");
     }
 }
-
