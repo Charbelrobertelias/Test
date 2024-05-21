@@ -1,15 +1,17 @@
-#include "athlete.h"
+#ifndef ATHLETE_H
+#define ATHLETE_H
 
-Athlete* creerAthlete(char* nom, char* prenom, char* genre) {
-    Athlete* athlete = (Athlete*) malloc(sizeof(Athlete));
-    strcpy(athlete->nom, nom);
-    strcpy(athlete->prenom, prenom);
-    strcpy(athlete->genre, genre);
-    return athlete;
-}
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-void afficherAthlete(Athlete* athlete) {
-    printf("Nom: %s, Prénom: %s, Genre: %s\n", athlete->nom, athlete->prenom, athlete->genre);
-}
+typedef struct {
+    char nom[50];
+    char prenom[50];
+    char genre[10];
+} Athlete;
 
+Athlete* creerAthlete(char* nom, char* prenom, char* genre);
+void afficherAthlete(Athlete* athlete);
 
+#endif
