@@ -103,55 +103,59 @@ void envoyerAuxJO() {
                     }
                 }
                 fclose(file);
-            if (nbEntrainements > 0) {
-                performances[nbPerformances].tempsMoyen = sommeTemps / nbEntrainements;
-                strcpy(performances[nbPerformances].nom, athletes[j]);
-                nbPerformances++;
+
+                if (nbEntrainements > 0) {
+                    performances[nbPerformances].tempsMoyen = sommeTemps / nbEntrainements;
+                    strcpy(performances[nbPerformances].nom, athletes[j]);
+                    nbPerformances++;
+                }
+            } else {
+                perror("Erreur lors de l'ouverture du fichier de performances");
             }
-        } else {
-            perror("Erreur lors de l'ouverture du fichier de performances");
+        }
+
+        // Trier les performances pour trouver les trois meilleurs
+        qsort(performances, nbPerformances, sizeof(AthletePerformance), comparerAthletes);
+
+        // Afficher les trois meilleurs
+        printf("Les trois meilleurs athlètes pour l'épreuve %s sont:\n", epreuves[i]);
+        for (int k = 0; k < 3 && k < nbPerformances; k++) {
+            printf("%d. %s avec un temps moyen de %.2f\n", k + 1, performances[k].nom, performances[k].tempsMoyen);
         }
     }
-
-    // Trier les performances pour trouver les trois meilleurs
-    qsort(performances, nbPerformances, sizeof(AthletePerformance), comparerAthletes);
-
-    // Afficher les trois meilleurs
-    printf("Les trois meilleurs athlètes pour l'épreuve %s sont:\n", epreuves[i]);
-    for (int k = 0; k < 3 && k < nbPerformances; k++) {
-        printf("%d. %s avec un temps moyen de %.2f\n", k + 1, performances[k].nom, performances[k].tempsMoyen);
-    }
 }
-// Affiche la progression d’un athlète pour une même épreuve entre deux dates
+
+// Affiche la progression d'un athlète pour une même épreuve entre deux dates
 void afficherProgression(char* nom, char* epreuve, char* date1, char* date2) {
-char filename[60];
-sprintf(filename, “%s.txt”, nom);
-FILE* file = fopen(filename, “r”);
-if (file != NULL) {
-char line[100];
-float temps1 = -1, temps2 = -1;
-    while (fgets(line, sizeof(line), file)) {
-        char date[11], event[50];
-        float temps;
-        int positionRelais;
-        sscanf(line, "%10[^,],%49[^,],%f,%d", date, event, &temps, &positionRelais);
-        if (strcmp(event, epreuve) == 0) {
-            if (strcmp(date, date1) == 0) {
-                temps1 = temps;
-            }
-            if (strcmp(date, date2) == 0) {
-                temps2 = temps;
+    char filename[60];
+    sprintf(filename, "%s.txt", nom);
+    FILE* file = fopen(filename, "r");
+    if (file != NULL) {
+        char line[100];
+        float temps1 = -1, temps2 = -1;
+
+        while (fgets(line, sizeof(line), file)) {
+            char date[11], event[50];
+            float temps;
+            int positionRelais;
+            sscanf(line, "%10[^,],%49[^,],%f,%d", date, event, &temps, &positionRelais);
+            if (strcmp(event, epreuve) == 0) {
+                if (strcmp(date, date1) == 0) {
+                    temps1 = temps;
+                }
+                if (strcmp(date, date2) == 0) {
+                    temps2 = temps;
+                }
             }
         }
-    }
-    fclose(file);
+        fclose(file);
 
-    if (temps1 == -1 || temps2 == -1) {
-        printf("Erreur : L'athlète n'a pas de temps enregistré pour les deux dates spécifiées.\n");
+        if (temps1 == -1 || temps2 == -1) {
+            printf("Erreur : L'athlète n'a pas de temps enregistré pour les deux dates spécifiées.\n");
+        } else {
+            printf("Progression de %s dans l'épreuve %s entre %s et %s : %.2f secondes\n", nom, epreuve, date1, date2, temps2 - temps1);
+        }
     } else {
-        printf("Progression de %s dans l'épreuve %s entre %s et %s : %.2f secondes\n", nom, epreuve, date1, date2, temps2 - temps1);
+        printf("Pas d'historique trouvé pour cet athlète\n");
     }
-} else {
-    printf("Pas d'historique trouvé pour cet athlète\n");
-}
 }
