@@ -64,21 +64,30 @@ int validerEpreuve(char* epreuve) {
 }
 
 // Vérifie qu'il n'y a pas déjà un entraînement de relais à cette date
-int verifierRelaisUnique(char* date, char* nom) {
-    char filename[60];
-    sprintf(filename, "%s.txt", nom);
-    FILE* file = fopen(filename, "r");
-    if (file != NULL) {
-        char line[100];
-        while (fgets(line, sizeof(line), file)) {
-            char dateLue[11], epreuveLue[50];
-            sscanf(line, "%10[^,],%49[^,]", dateLue, epreuveLue);
-            if (strcmp(date, dateLue) == 0 && strcmp(epreuveLue, "relais") == 0) {
+int verifierRelaisUnique(char* date) {
+    FILE* athletesFile = fopen("athletes.txt", "r");
+    if (athletesFile != NULL) {
+        char athleteName[50];
+        while (fgets(athleteName, sizeof(athleteName), athletesFile)) {
+            athleteName[strcspn(athleteName, "\n")] = '\0'; // Retire le saut de ligne
+            char filename[60];
+            sprintf(filename, "%s.txt", athleteName);
+            FILE* file = fopen(filename, "r");
+            if (file != NULL) {
+                char line[100];
+                while (fgets(line, sizeof(line), file)) {
+                    char dateLue[11], epreuveLue[50];
+                    sscanf(line, "%10[^,],%49[^,]", dateLue, epreuveLue);
+                    if (strcmp(date, dateLue) == 0 && strcmp(epreuveLue, "relais") == 0) {
+                        fclose(file);
+                        fclose(athletesFile);
+                        return 0; // Un autre relais existe déjà ce jour-là
+                    }
+                }
                 fclose(file);
-                return 0; // Un autre relais existe déjà ce jour-là
             }
         }
-        fclose(file);
+        fclose(athletesFile);
     }
     return 1; // Aucun relais trouvé ce jour-là
 }
@@ -108,60 +117,68 @@ void ajouterEntrainement() {
         if (!validerEpreuve(epreuve)) {
             printf("Epreuve invalide. Veuillez choisir une épreuve valide.\n");
         }
-    } while (!validerEpreuve);
-if (strcmp(epreuve, "relais") == 0) {
-    printf("Position dans le relais (1-4): ");
-    scanf("%d", &positionRelais);
+    } while (!validerEpreuve(epreuve));
 
-    // Vérifie qu'il n'y a pas déjà un entraînement de relais à cette date
-    if (!verifierRelaisUnique(date, nom)) {
-        printf("Erreur : Un autre relais est déjà enregistré à cette date.\n");
-        return;
-    }
-
-    // Vérifie qu'aucun athlète n'a déjà la même position dans le relais ce jour-là
-    char filename[60];
-    sprintf(filename, "%s.txt", nom);
-    FILE* file = fopen(filename, "r");
-    if (file != NULL) {
-        char line[100];
-        while (fgets(line, sizeof(line), file)) {
-            char dateLue[11], epreuveLue[50];
-            float tempsLue;
-            int positionRelaisLue;
-            sscanf(line, "%10[^,],%49[^,],%f,%d", dateLue, epreuveLue, &tempsLue, &positionRelaisLue);
-            if (strcmp(date, dateLue) == 0 && strcmp(epreuveLue, "relais") == 0 && positionRelais == positionRelaisLue) {
-                printf("Erreur : Un autre athlète a déjà la position %d dans le relais pour cette date.\n", positionRelais);
-                fclose(file);
-                return;
-            }
+    if (strcmp(epreuve, "relais") == 0) {
+        if (!verifierRelaisUnique(date)) {
+            printf("Erreur : Un autre relais est déjà enregistré à cette date.\n");
+            return;
         }
-        fclose(file);
+
+        printf("Position dans le relais (1-4): ");
+        scanf("%d", &positionRelais);
+
+        // Vérifie qu'aucun athlète n'a déjà la même position dans le relais ce jour-là
+        FILE* athletesFile = fopen("athletes.txt", "r");
+        if (athletesFile != NULL) {
+            char athleteName[50];
+            while (fgets(athleteName, sizeof(athleteName), athletesFile)) {
+                athleteName[strcspn(athleteName, "\n")] = '\0'; // Retire le saut de ligne
+                char filename[60];
+                sprintf(filename, "%s.txt", athleteName);
+                FILE* file = fopen(filename, "r");
+                if (file != NULL) {
+                    char line[100];
+                    while (fgets(line, sizeof(line), file)) {
+                        char dateLue[11], epreuveLue[50];
+                        int positionRelaisLue;
+                        sscanf(line, "%10[^,],%49[^,],%*f,%d", dateLue, epreuveLue, &positionRelaisLue);
+                        if (strcmp(date, dateLue) == 0 && strcmp(epreuveLue, "relais") == 0 && positionRelais == positionRelaisLue) {
+                            printf("Erreur : Un autre athlète a déjà la position %d dans le relais pour cette date.\n", positionRelais);
+                            fclose(file);
+                            fclose(athletesFile);
+                            return;
+                        }
+                    }
+                    fclose(file);
+                }
+            }
+            fclose(athletesFile);
+        }
     }
+
+    do {
+        printf("Temps: ");
+        if (scanf("%f", &temps) == 1 && validerTemps(temps)) {
+            break;
+        } else {
+            printf("Temps invalide. Veuillez entrer un temps positif.\n");
+            while (getchar() != '\n'); // Nettoie le buffer d'entrée
+        }
+    } while (1);
+
+    Athlete* athlete = creerAthlete(nom, prenom);
+    Performance* performance = creerPerformance(date, epreuve, temps, positionRelais);
+    sauvegarderPerformance(nom, performance);
+    afficherAthlete(athlete);
+    free(athlete);
+    free(performance);
 }
 
-do {
-    printf("Temps: ");
-    if (scanf("%f", &temps) == 1 && validerTemps(temps)) {
-        break;
-    } else {
-        printf("Temps invalide. Veuillez entrer un temps positif.\n");
-        while (getchar() != '\n'); // Nettoie le buffer d'entrée
-    }
-} while (1);
-
-Athlete* athlete = creerAthlete(nom, prenom);
-Performance* performance = creerPerformance(date, epreuve, temps, positionRelais);
-sauvegarderPerformance(nom, performance);
-afficherAthlete(athlete);
-free(athlete);
-free(performance);
-}
-
-// Consulte l’historique des entraînements d’un athlète
+// Consulte l'historique des entraînements d'un athlète
 void consulterHistorique() {
-char nom[50];
-printf(“Nom de l’athlète: “);
-scanf(”%s”, nom);
-lireHistorique(nom);
+    char nom[50];
+    printf("Nom de l'athlète: ");
+    scanf("%s", nom);
+    lireHistorique(nom);
 }
