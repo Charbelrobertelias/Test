@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Sauvegarde une performance dans un fichier
 void sauvegarderPerformance(char* nom, Performance* performance) {
     char filename[60];
     sprintf(filename, "%s.txt", nom);
@@ -15,6 +16,7 @@ void sauvegarderPerformance(char* nom, Performance* performance) {
     }
 }
 
+// Lit l'historique des performances d'un athlète
 void lireHistorique(char* nom) {
     char filename[60];
     sprintf(filename, "%s.txt", nom);
