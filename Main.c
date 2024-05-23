@@ -10,7 +10,7 @@ void menu() {
     printf("Gestion des performances des athlètes\n");
     printf("1. Ajouter un nouvel entraînement\n");
     printf("2. Consulter l'historique des entraînements\n");
-    printf("3. Consulter les statistiques\n");
+    printf("3. Consulter les statistiques et la progression d'un athlète\n");
     printf("4. Voir les 3 meilleurs athlètes pour chaque épreuve et les envoyer aux JO\n");
     printf("5. Quitter\n");
 }
@@ -18,7 +18,7 @@ void menu() {
 // Déclare la fonction pour envoyer les athlètes aux JO
 void envoyerAuxJO();
 
-// Déclare la fonction pour afficher les statistiques des athlètes, y compris la progression
+// Déclare la fonction pour consulter les statistiques des athlètes et afficher la progression
 void consulterStatsEtProgression();
 
 int main() {
